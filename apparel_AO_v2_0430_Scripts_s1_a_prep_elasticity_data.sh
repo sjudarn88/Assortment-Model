@@ -63,7 +63,10 @@ bq query --allow_large_results
                   select *
                   , lead(price_start_wk, 1, 999999) over(partition by soar_no, div_no, ln_no, cls_no order by price_start_wk) as next_price_start_wk 
                    from cls_lvl_price ) 
-                  select b.soar_no
+                   
+                   
+                  
+               select b.soar_no
                       , b.div_no
                       , b.ln_no
                       , b.cls_no
@@ -71,9 +74,9 @@ bq query --allow_large_results
                       , wk_nbr
                       , b.UNITS as log_UNITS
                       , a.avg_prc_amt as log_price 
-                   from cls_lvl_sales as b 
-                   left join cls_lvl_price2 as a 
-                   on b.soar_no = a.soar_no and b.div_no = a.div_no and b.ln_no = a.ln_no and b.cls_no = a.cls_no 
+               from cls_lvl_sales as b 
+               left join cls_lvl_price2 as a 
+               on b.soar_no = a.soar_no and b.div_no = a.div_no and b.ln_no = a.ln_no and b.cls_no = a.cls_no 
                       and (b.wk_nbr >= a.price_start_wk and b.wk_nbr < a.next_price_start_wk)"
 
 echo Writing to Google Storage store $store ... 
