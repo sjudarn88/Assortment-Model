@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 
-df=pd.read_gb1("SELECT locn_nbr FROM apparel_ao_v2_allstores.all_stores", project_id="syw-analytics-ff",dialet="standard")
+df=pd.read_gbq("SELECT locn_nbr FROM apparel_ao_v2_allstores.all_stores", project_id="syw-analytics-ff",dialect="standard")
 stores=df["locn_nbr"]
 '''
 1	102	APPAREL - CHILDRENS / KIDS	29	NWBN,TDDL,JUV,CHAR/STPLS	 
