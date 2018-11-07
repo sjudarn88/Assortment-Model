@@ -27,6 +27,7 @@ divs = [38] #18
 #soar = 104
 #divs = ["41_43", "33", "45"]
 
+#backward store list
 stores = list(reversed(stores))
 #print(df["locnnbr"])
 
