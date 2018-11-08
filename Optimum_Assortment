@@ -1,0 +1,280 @@
+import sys
+import pandas as pd
+import time
+import sklearn
+import sklearn.datasets
+import sklearn.ensemble
+import numpy as np
+from numpy import prod
+from sortedcontainers import SortedDict
+from operator import mul
+from operator import itemgetter
+from multiprocessing import Pool
+import multiprocessing as mp
+
+store = sys.argv[1]
+div = sys.argv[2]
+soar = sys.argv[3]
+season = sys.argv[4]
+x = div.rstrip().split("_")
+div_nbr = [int(elem) for elem in x]
+
+print(store)
+print(div_nbr)
+
+def parallelize_dataframe(df, func, pool_):
+    #if df.shape[0] < 8:
+    #    df_split = np.array_split(df, df.shape[0])
+    #else: 
+    #    df_split = np.array_split(df, 8)
+    if df.shape[0] < 8:
+        return apply_fun(df)
+    
+    df_split = np.array_split(df, 8)
+    #pool = Pool(8)
+    df = pd.concat(pool_.map(func, df_split))
+    #pool.close()
+    #pool.join()
+    return df
+
+def apply_fun(data):  
+    data['V1'] = data.apply(my_fun1, axis = 1)
+    data['V2'] = data.apply(my_fun2, axis = 1)
+    return data
+
+def my_fun1(x):
+    #print(x)
+    mykeys = []
+    mykeys = [str(x['div_ln_cls_num']) + '_' + s for s in list(map(str, classes))]
+    # Cross elasticities between classes (New SKU and existing SKUs in Optimum set)
+    elas_map_ss = [elas_map[x1] for x1 in mykeys]
+    f = prod(elas_map_ss)
+     
+    return (x["potentail_profit"]*f)
+    #output.put((prod, x["potentail_profit"] * f))
+
+def my_fun2(x):
+    #print(x)
+    mykeys2 = []
+    mykeys2 = [s + '_' + str(x['div_ln_cls_num']) for s in list(map(str, classes)) ]
+    elas_map_ss2 = [elas_map[x2] for x2 in mykeys2]
+    
+    v2 = np.sum(np.array(classes_v1)) + x["V1"]
+     
+    return v2
+
+def modify_v1(classv1, dnum):
+    mykeys2 = []
+    mykeys2 = [s + '_' + str(dnum) for s in list(map(str, classes)) ]
+    elas_map_ss2 = [elas_map[x2] for x2 in mykeys2]
+    classv1 = np.array(classv1) * np.array(elas_map_ss2)
+    return classv1.tolist()
+
+def new_col(x):
+    if ((x['rank'] > 0) & (x['type'] == 'existing')):
+        return 'Both'
+    elif ((x['rank'] > 0) & (x['type'] == 'new')):
+        return 'Optim'
+    elif ((x['rank'] == 0) & (x['type'] == 'existing')):
+        return 'Current'
+    else :
+        return 'None'
+
+def thresold(x):
+    if np.isnan(x['elasticity']) or x['elasticity'] == 0 :
+        return 0
+    elif x['elasticity'] > 0 :
+        return 1
+    else:
+        return -1
+
+
+#Read store File
+dt = pd.read_csv('./' + store + '_' + soar +"_"+ div +  "_" + season + '/store_data_store_' + store + '_' + soar + "_" + div + "_" + season+ '.csv')
+dt = dt[dt.div_no.isin(div_nbr)]
+print(dt.shape)
+
+dt = dt.drop_duplicates()
+dt = dt.sort_values('type')
+dt = dt.drop_duplicates('prodirlnbr')
+
+
+dt_original = dt.copy()
+print(dt_original.shape)
+#dt_original = dt.copy()
+dt["cluster_max_old"] = dt["cluster_max"]
+dt["cluster_max"] = dt.apply(lambda x: ((x["storeA_div_units"]/x["locnnbr_div_units"]) * x["cluster_max"] +(x["sim_mem_cnt"]/x["max_sim_mem_cnt"])*x["cluster_max"])/2 if x["type"] == "new" else None, axis = 1)
+
+
+
+
+
+dt_existing = dt[dt.type == "existing"].copy()
+median = dt_existing.describe()["UNITS"]["50%"]
+print(median)
+dt_new = dt[dt.type == "new"].copy()
+print(dt_new.shape)
+dt_new_lessthanmedian = dt_new[dt_new.cluster_max <= median]
+dt_new_lessthanmedian["type"] = "new-lessthanmedian"
+print(dt_new_lessthanmedian.shape)
+dt_new_greaterthanmedian = dt_new[dt_new.cluster_max > median]
+print(dt_new_greaterthanmedian.shape)
+dt = pd.concat([dt_existing, dt_new_greaterthanmedian], axis = 0)
+print(dt.shape)
+dt_original = pd.concat([dt_new_lessthanmedian, dt_existing, dt_new_greaterthanmedian])
+
+
+dt_original = dt_original.rename(columns = {"prodirlnbr" : "prodirlno"})
+print(dt_original.shape)
+
+
+
+#NATL_SELL_PPRICE*AVG(otd_pc)
+avg_otd = np.mean(dt["otd_pc"])
+dt['avg_otd'] = avg_otd
+#print(avg_otd)
+dt['price'] = np.where(dt['otd_amt'].isnull(), dt['NAT_SLL_PRC'] * dt['avg_otd'], dt['otd_amt'])
+#dt.NAT_SLL_PRC.isna().sum()
+
+avg_otd = np.mean(dt_original["otd_pc"])
+dt_original['avg_otd'] = avg_otd
+#print(avg_otd)
+dt_original['price'] = np.where(dt_original['otd_amt'].isnull(), dt_original['NAT_SLL_PRC'] * dt_original['avg_otd'], dt_original['otd_amt'])
+#dt_original.NAT_SLL_PRC.isna().sum()
+
+dt['sell_thru_imputed'] = dt.sell_thru.transform(lambda x: x.fillna(x.mean()))
+
+# Scale demand by sell-thru
+dt['potential_UNITS'] = np.where(dt['UNITS'] == 0, dt['cluster_max']*(np.exp(2*dt['sell_thru_imputed']) - 1), dt['UNITS'] *(np.exp(2*dt['sell_thru_imputed']) - 1))
+dt['potentail_profit'] = dt['potential_UNITS']*(dt['price'] - dt['NAT_CST_PRC'])
+
+dt_original['sell_thru_imputed'] = dt_original.sell_thru.transform(lambda x: x.fillna(x.mean()))
+
+# Scale demand by sell-thru
+dt_original['potential_UNITS'] = np.where(dt_original['UNITS'] == 0, dt_original['cluster_max']*(np.exp(2*dt_original['sell_thru_imputed']) - 1), dt_original['UNITS'] *(np.exp(2*dt_original['sell_thru_imputed']) - 1))
+dt_original['potentail_profit'] = dt_original['potential_UNITS']*(dt_original['price'] - dt_original['NAT_CST_PRC'])
+
+# Load elasticity file here
+# Load elasticity file here
+elasticity = pd.read_csv('./' + store + '_' + soar + "_"+div + "_" + season +  '/elasticities_' + store + '_' + soar + "_" + div + "_" + season + '_pair.csv', na_values = 'null')
+
+# Replace missing elasticities with 0
+#elasticity['elasticity'] = elasticity.elasticity.transform(lambda x: x.fillna(0))
+
+# Thresold elasticity values
+elasticity['elasticity'] = elasticity.apply(thresold, axis = 1)
+
+
+elasticity['elasticity'] = np.exp(-1*elasticity['elasticity'])
+#dt['div_ln_cls'] = dt['div_nbr'].astype(str) + '_' + dt['ln_nbr'].astype(str) + '_' + dt['cls_nbr'].astype(str)
+
+dt['div_ln_cls'] = soar + '_' + dt['div_no'].astype(str) + '_' + dt['ln_no'].astype(str) + '_' + dt['cls_no'].astype(str)
+
+
+
+
+
+dt = dt.rename(columns = {"prodirlnbr" : "prodirlno"})
+dt1 = dt.copy()
+
+#dt = dt1.loc[dt1.div_ln_cls.isin(p),:]
+dt["prodirlno"] = dt["prodirlno"].astype(str)
+
+
+
+ss = dt.loc[:,("prodirlno", "potentail_profit", "div_ln_cls")]
+
+ss = ss[ss["potentail_profit"] > 0]
+
+ss = ss[ss.div_ln_cls.isin(elasticity['div_ln_cls_1'].tolist()+elasticity['div_ln_cls_2'].tolist())]
+categorical_names = {}
+le = sklearn.preprocessing.LabelEncoder()
+le.fit(elasticity['div_ln_cls_1'])
+
+
+elasticity['div_ln_cls_1'] = le.transform(elasticity['div_ln_cls_1'])
+categorical_names['div_ln_cls_1'] = le.classes_
+elasticity['div_ln_cls_2'] = le.transform(elasticity['div_ln_cls_2'])
+categorical_names['div_ln_cls_2'] = le.classes_
+
+
+ss['div_ln_cls_num'] = le.transform(ss['div_ln_cls'])
+#categorical_names['div_ln_cls_num'] = le.classes_
+optimum = []
+optimum.append((1, ss.loc[ss["potentail_profit"].idxmax(),:][0]))
+optimum_skus =  [r[1] for r in optimum]
+ss_optimum = ss[ss.prodirlno.isin(optimum_skus)]
+
+elas = elasticity.iloc[:,[0,1,2]]
+elas['c_map'] = elas['div_ln_cls_1'].astype(str) + '_' + elas['div_ln_cls_2'].astype(str)
+
+elas = elas.iloc[:,[3,2]]
+elas_map = elas.set_index('c_map')['elasticity'].to_dict()
+elas_map = SortedDict(elas_map)
+
+#Classes in Optimum Set
+classes = ss_optimum.div_ln_cls_num.tolist()
+
+classes_v1 = ss_optimum.potentail_profit.tolist()
+
+classes_v= ss_optimum.potentail_profit.tolist()
+classes_v= ss_optimum.potentail_profit.tolist()
+
+
+if __name__ == '__main__':
+    pool = Pool(8)
+    t1 = time.time()
+    while (len(optimum) < dt[dt.type ==  "existing"].shape[0]):
+        ss_ss = ss[~ss.prodirlno.isin(optimum_skus)]
+        if ss_ss.shape[0] == 0:
+            break
+        ss_ss = parallelize_dataframe(ss_ss, apply_fun, pool)
+        #ss_ss = ss_ss.apply(my_fun, axis =1)
+        # get the next item in assortment which maximizes V2
+        optimum.append((len(optimum) + 1, ss_ss.loc[ss_ss["V2"].idxmax(),:][0]))
+        #print("initial calsses_v1:",classes_v1)
+        #adding this item will change the v1 of already existing items in assortment, hence they are updated
+        classes_v1_temp = modify_v1(classes_v1, ss_ss.loc[ss_ss["V2"].idxmax(),:][3])
+        #print("modified classes_v1:", classes_v1_temp)
+        #add the item to assortment
+        classes = classes + [ss_ss.loc[ss_ss["V2"].idxmax(),:][3]]
+
+        #print("item v1 added:",ss_ss.loc[ss_ss["V2"].idxmax(),:][4])
+        
+        #add v1 of the item to V1 of all items in the assortment
+        classes_v1 = classes_v1_temp + [ss_ss.loc[ss_ss["V2"].idxmax(),:][4]]
+        #print("final classes_v1:",classes_v1)
+        #classes_v2 = classes_v2 + [ss_ss.loc[ss_ss["V2"].idxmax(),:][5]]
+        #print("item_added:", ss_ss.loc[ss_ss["V2"].idxmax(),:][0])
+
+        optimum_skus =  [r[1] for r in optimum]
+        ss_optimum = ss[ss.prodirlno.isin(optimum_skus)]
+        
+        if len(optimum) % 100 == 0 :
+            print(len(optimum))
+            print((time.time() - t1))
+        #print("===================")
+    t2 = time.time()
+    print((t2 - t1)/60)
+    
+    pool.close()
+    pool.join()
+    
+tdt = dt.copy()
+
+optimum_rank_yonkers = pd.DataFrame(optimum)
+optimum_rank_yonkers.columns = ['rank', 'prodirlno']
+dt = tdt.merge(optimum_rank_yonkers, how = 'left', on = 'prodirlno')
+dt['rank'].fillna(0, inplace = True)
+dt['type2'] = dt.apply(new_col, axis = 1)
+dt['expected_units'] = np.where(dt['type2'] == 'Optim', dt['cluster_max'], dt['UNITS'])
+#dt['expected_units_less_ls'] = np.where(dt['UNITS'] == 0, dt['cluster_max'], dt['UNITS'])
+dt['expected_rev'] = dt['expected_units']*dt['price']
+dt['expected_mgn'] = dt['expected_units']*(dt['price'] - dt['NAT_CST_PRC'])
+#dt['expected_rev_less_ls'] = dt['expected_units_less_ls']*dt['price']
+#dt['expected_mgn_less_ls'] = dt['expected_units_less_ls']*(dt['price'] - dt['NAT_CST_PRC'])
+#dt.to_csv('./' + store + '_' + div + '/AO_output_file_0523_' + store + '_' + div + '.csv')
+
+
+x = pd.concat([dt,dt_new_lessthanmedian])
+x.to_csv('./' + store + '_' + soar + "_" + div + "_" + season + '/AO_output_file_' + store +  '_' + soar + "_" + div + "_" + season+ '.csv')
