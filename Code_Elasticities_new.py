@@ -12,7 +12,7 @@ result = pd.DataFrame()
 resultfile2 = './' + store + '_' + soar + "_" + div + "_" + season + '/elasticities_' + store + '_' +soar + "_" + div +"_"+ season + '_pair.csv'
 result2 = pd.DataFrame()
 
-elasticfile = './' + store + '_' +  soar + "_" + div + "_" + season + '/elasticity_data_store_' + store + '_' + soar + '_' + div + '_wide.csv'
+elasticfile = './' + store + '_' +  soar + "_" + div + "_" + season + '/_' + store + '_' + soar + '_' + div + '_wide.csv'
 
 print("Reading file")
 analysisFile = pd.DataFrame()
@@ -78,6 +78,7 @@ for name, group in analysisFile.groupby('div_ln_cls', as_index=False):
     weeklist = sortData.week.unique()
 #    print(weeklist)
 
+#Generating 23000 of 0s list.
     k = 0
     coef = [0]*23000
     startwk = [0]*23000
