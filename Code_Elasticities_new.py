@@ -22,6 +22,7 @@ analysisFile = pd.read_csv(elasticfile, index_col=None, header=0)
 cols = [col for col in analysisFile.columns if col not in ['Unnamed: 0', 'wk_nbr', 'div_ln_cls', 'log_UNITS']]
 
 #for store __,delete 14 cols out of 36 cols.
+#each wk_nbr has duplicate values. We are only considering clusters with more than 30 wk_nbrs.
 del_cols = dict()
 for col in cols:
     if analysisFile.drop_duplicates(["wk_nbr", col]).loc[:,['wk_nbr', col]][col].count() < 30:
@@ -30,11 +31,9 @@ for col in cols:
 
 print("Remove products")
 analysisFile = analysisFile[~analysisFile.div_ln_cls.isin(del_cols.keys())]
-
-
 analysisFile.drop(del_cols.keys(), axis = 1, inplace = True)
 
-
+#imputing values for NAs
 print("imputing_values")
 imputing_values = dict()
 for col in cols:
@@ -46,11 +45,7 @@ for col in cols:
 
 analysisFile.fillna(imputing_values, inplace = True)
 
-
-
 len(analysisFile.div_ln_cls.unique())
-
-
 
 previous_cols = cols.copy()
 
