@@ -21,7 +21,7 @@ analysisFile = pd.read_csv(elasticfile, index_col=None, header=0)
 #columns with cluster numbers
 cols = [col for col in analysisFile.columns if col not in ['Unnamed: 0', 'wk_nbr', 'div_ln_cls', 'log_UNITS']]
 
-
+#for store __,delete 14 cols out of 36 cols.
 del_cols = dict()
 for col in cols:
     if analysisFile.drop_duplicates(["wk_nbr", col]).loc[:,['wk_nbr', col]][col].count() < 30:
