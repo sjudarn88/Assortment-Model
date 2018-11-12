@@ -18,6 +18,7 @@ print("Reading file")
 analysisFile = pd.DataFrame()
 analysisFile = pd.read_csv(elasticfile, index_col=None, header=0)
 
+#columns with cluster numbers
 cols = [col for col in analysisFile.columns if col not in ['Unnamed: 0', 'wk_nbr', 'div_ln_cls', 'log_UNITS']]
 
 
