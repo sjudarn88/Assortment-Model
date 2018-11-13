@@ -57,6 +57,8 @@ print("calculate elasticities")
 t = 0
 div_count = 0
 for name, group in analysisFile.groupby('div_ln_cls', as_index=False):
+    
+# For each cluster, generate a group of data only containing 1 clusters with other clusters for this for loop.
     print("==========================")
     print(div_count,"...........",name)
     print(group.shape)
@@ -65,6 +67,7 @@ for name, group in analysisFile.groupby('div_ln_cls', as_index=False):
     partData = group[group['wk_nbr'] > 201600]
     #print(partData.shape)
 
+# delete the cluster which don't belong to >30 wk_nbrs.
     classData = pd.DataFrame()
     classData = partData[cols].copy()#.replace('NA', 0)
     #print(classData.shape)
@@ -72,6 +75,7 @@ for name, group in analysisFile.groupby('div_ln_cls', as_index=False):
     classData['unit'] = partData['log_UNITS']
     #print(classData.shape)
 
+# sort group data by weeks.
     sortData = pd.DataFrame()
     sortData = classData.sort_values('week')
 #    print(sortData.shape[0])
