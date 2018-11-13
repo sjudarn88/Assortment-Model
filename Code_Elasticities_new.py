@@ -115,7 +115,7 @@ for name, group in analysisFile.groupby('div_ln_cls', as_index=False):
 #            print(coef[k])
 
             k = k+1
-
+###Using the begin and end data to subset the dataset, then calculating all coefs with other clusters again.
     min_coef = min(coef)
     #print("self coef.......", coef)
     print("min self.....", min_coef)
@@ -132,7 +132,9 @@ for name, group in analysisFile.groupby('div_ln_cls', as_index=False):
         minclf.fit(mindataset[cols], mindataset['unit'])
         coeflist = minclf.coef_
         #print(coeflist)
-    
+ 
+### result writing clusters own elasticity and others.
+### result2 writing elasticities between each clusters.
         result.loc[t, 'div_ln_cls'] = name
         result.loc[t, 'own_elasticity'] = min_coef
         result.loc[t, 'week_start'] = startwk[index]
@@ -146,6 +148,7 @@ for name, group in analysisFile.groupby('div_ln_cls', as_index=False):
             result2.loc[t*len(cols)+s, 'elasticity'] = coeflist[s]
             
             s = s+1
+### if there's null value for that cluster, then elasticity will be null.
     else:
         result.loc[t, 'div_ln_cls'] = name
         result.loc[t, 'own_elasticity'] = 'null'
@@ -168,7 +171,7 @@ for name, group in analysisFile.groupby('div_ln_cls', as_index=False):
 
 
 
-
+### for deleted columns paired with deleted and non deleted clusters, elasticity between pairs will be 0.
 zero_pairs = []
 for colsname1 in del_cols:
     for colsname2 in cols+list(del_cols.keys()):
@@ -178,6 +181,7 @@ for colsname1 in del_cols:
         pair["elasticity"] = 0
         zero_pairs.append(pair)  
 
+ ### for non deleted columns paired with deleted columns, elasticity between pairs will be 0.
 zero_pairs_2 = []
 for colsname1 in cols:
     for colsname2 in del_cols:
@@ -189,40 +193,13 @@ for colsname1 in cols:
 
 zero_df = pd.DataFrame(zero_pairs)
 zero_df2 = pd.DataFrame(zero_pairs_2)
+
+###final append 3 datasets, with elasticity or 0 elasticity.
 final = pd.concat([result2, zero_df, zero_df2], axis = 0)
 print(result2.shape)
 print(zero_df.shape)
 print(final.shape)
 print(len(cols))
 
+###Writing final result to _pair.csv file
 final.to_csv(resultfile2, mode='w', index=False)
-
-
-###Practice
-
-for i in np.arange(0, sortData.shape[0]-2, 1):
-    print(weeklist[i])
-
-   for j in np.arange(i+3, sortData.shape[0]-1, 1):
-        print(weeklist[j])
-        print(k)
-       
-       startwk[k] = weeklist[i]
-       endwk[k] = weeklist[j]
-        print(startwk[k])
-        print(endwk[k])
-
-       dataset = pd.DataFrame()
-       dataset = sortData[(sortData['week']>=startwk[k]) & (sortData['week']<=endwk[k])]
-       #print(dataset.shape)
-       #print(len(dataset.columns))
-       #print(len(cols))
-       clf = linear_model.LinearRegression()
-       #print(clf)
- #fit(X, Y), unit change in this cluster, based on change of prices of other clusters.
-       clf.fit(dataset[cols], dataset['unit'])
-       loc = dataset[cols].columns.get_loc(name)
-       coef[k] = clf.coef_[loc]
-        print(coef[k])
-
-       k = k+1
