@@ -107,6 +107,7 @@ for name, group in analysisFile.groupby('div_ln_cls', as_index=False):
             #print(len(cols))
             clf = linear_model.LinearRegression()
             #print(clf)
+      #fit(X, Y), unit change in this cluster, based on change of prices of other clusters.
             clf.fit(dataset[cols], dataset['unit'])
             loc = dataset[cols].columns.get_loc(name)
             coef[k] = clf.coef_[loc]
