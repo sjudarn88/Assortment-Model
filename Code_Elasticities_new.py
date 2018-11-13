@@ -109,6 +109,7 @@ for name, group in analysisFile.groupby('div_ln_cls', as_index=False):
             #print(clf)
       #fit(X, Y), unit change in this cluster, based on change of prices of other clusters.
             clf.fit(dataset[cols], dataset['unit'])
+      # For the same cluster, price change relatively to unit change
             loc = dataset[cols].columns.get_loc(name)
             coef[k] = clf.coef_[loc]
 #            print(coef[k])
@@ -195,3 +196,33 @@ print(final.shape)
 print(len(cols))
 
 final.to_csv(resultfile2, mode='w', index=False)
+
+
+###Practice
+
+for i in np.arange(0, sortData.shape[0]-2, 1):
+    print(weeklist[i])
+
+   for j in np.arange(i+3, sortData.shape[0]-1, 1):
+        print(weeklist[j])
+        print(k)
+       
+       startwk[k] = weeklist[i]
+       endwk[k] = weeklist[j]
+        print(startwk[k])
+        print(endwk[k])
+
+       dataset = pd.DataFrame()
+       dataset = sortData[(sortData['week']>=startwk[k]) & (sortData['week']<=endwk[k])]
+       #print(dataset.shape)
+       #print(len(dataset.columns))
+       #print(len(cols))
+       clf = linear_model.LinearRegression()
+       #print(clf)
+ #fit(X, Y), unit change in this cluster, based on change of prices of other clusters.
+       clf.fit(dataset[cols], dataset['unit'])
+       loc = dataset[cols].columns.get_loc(name)
+       coef[k] = clf.coef_[loc]
+        print(coef[k])
+
+       k = k+1
