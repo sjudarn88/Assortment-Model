@@ -270,69 +270,70 @@ SELECT   a11.* EXCEPT(sim_mem_cnt,max_sim_mem_cnt)
                            ,x11.div_no
                            ,SUM(x11.UNITS) AS div_units   
                     FROM     all_sales_L1Y x11   
-GROUP BY     x11.locnnbr,x11.soar_no,x11.div_no ) a13 
-ON   a11.storeA =a13.locnnbr   
-AND a11.soar_no = a13.soar_no   
-AND a11.div_no = a13.div_no 
-WHERE   a11.UNITS = a11.cluster_max   
-AND a11.soar_no IN (101, 102,103, 104, 105)   
-AND a11.storeA = @str 
-UNION ALL SELECT   @str AS storeA
-,b.locnnbr
-,c.soar_no
-,c.div_no
-,c.div_nm
-,c.ln_no
-,c.ln_ds
-,c.cls_no
-,c.cls_ds
-,b.prodirlnbr
-,c.ITM_NO
-,c.PRD_DS
-,c.NAT_SLL_PRC
-,c.NAT_CST_PRC
-,SUM(b.UnitQty) AS UNITS
-,0 AS cluster_max
-,'existing' AS type
-,SUM(b.UnitQty)/ (SUM(b.UnitQty) + AVG(d.on_hand_inv_units)) AS sell_thru
-,SUM(b.UnitQty*b.otdamt )/SUM(b.UnitQty) AS otd_amt
-,(SUM(b.UnitQty*b.otdamt )/SUM(b.UnitQty))/c.NAT_SLL_PRC AS otd_pc
-,NULL AS sim_mem_cnt
-,NULL AS max_sim_mem_cnt
-,NULL AS locnnbr_div_units
-,NULL AS storeA_div_units 
-FROM   \`syw-analytics-repo-prod.l2_enterpriseanalytics.postrandtl\` AS b 
-LEFT JOIN   \`syw-analytics-repo-prod.cbr_mart_tbls.sywr_srs_soar_bu\` AS c 
-ON   b.ProdIrlNbr=c.prd_irl_no 
-LEFT JOIN   \`syw-analytics-repo-prod.lci_dw_views.sprs_product\` z 
-ON   b.ProdIrlNbr = z.prd_irl_no 
-LEFT JOIN ( SELECT     prodirlnbr
-,on_hand_inv_units   
-FROM ( SELECT   prodirlnbr
-,locn_nbr
-,wk_nbr
-,on_hand_inv_units
-,RANK() OVER (PARTITION BY prodirlnbr, locn_nbr ORDER BY wk_nbr DESC) AS rn     
-FROM       inv     
-WHERE       locn_nbr = @str )   
-WHERE     rn = 1 ) AS d 
-ON   b.ProdIrlNbr = d.prodirlnbr 
-WHERE   b.TranDt >'2017-04-30'   
-AND b.TranDt <'2017-12-31'   
-AND b.FmtSbtyp IN ('A','B','C','D','M')   
-AND b.mrchndssoldstscd IN ('R','P')   
-AND b.SrsKmtInd='S'   
-AND b.trantypeind = 'S'   
-AND b.SrsDvsnNbr NOT IN (0,79)   
-AND b.locnnbr <> 9300   
-AND b.ringinglocnnbr <> 9300   
-AND c.soar_no IN (101,102,103,104,105)   
-AND b.locnnbr = @str   
-AND z.ssn_cd IN ('H7','F7')   
-AND c.soar_no IN (101, 102, 103, 104, 105)   
-AND c.NAT_SLL_PRC > 0 
-GROUP BY   1,2,3,4,5,6,7,8,9,10,11,12,13,14 
-HAVING   UNITS > 0"
+                    GROUP BY     x11.locnnbr,x11.soar_no,x11.div_no ) a13 
+                    ON   a11.storeA =a13.locnnbr   
+                         AND a11.soar_no = a13.soar_no   
+                         AND a11.div_no = a13.div_no 
+                    WHERE   a11.UNITS = a11.cluster_max   
+                            AND a11.soar_no IN (101, 102,103, 104, 105)   
+                            AND a11.storeA = @str 
+UNION ALL 
+SELECT   @str AS storeA
+        ,b.locnnbr
+        ,c.soar_no
+        ,c.div_no
+        ,c.div_nm
+        ,c.ln_no
+        ,c.ln_ds
+        ,c.cls_no
+        ,c.cls_ds
+        ,b.prodirlnbr
+        ,c.ITM_NO
+        ,c.PRD_DS
+        ,c.NAT_SLL_PRC
+        ,c.NAT_CST_PRC
+        ,SUM(b.UnitQty) AS UNITS
+        ,0 AS cluster_max
+        ,'existing' AS type
+        ,SUM(b.UnitQty)/ (SUM(b.UnitQty) + AVG(d.on_hand_inv_units)) AS sell_thru
+        ,SUM(b.UnitQty*b.otdamt )/SUM(b.UnitQty) AS otd_amt
+        ,(SUM(b.UnitQty*b.otdamt )/SUM(b.UnitQty))/c.NAT_SLL_PRC AS otd_pc
+        ,NULL AS sim_mem_cnt
+        ,NULL AS max_sim_mem_cnt
+        ,NULL AS locnnbr_div_units
+        ,NULL AS storeA_div_units 
+    FROM   \`syw-analytics-repo-prod.l2_enterpriseanalytics.postrandtl\` AS b 
+    LEFT JOIN   \`syw-analytics-repo-prod.cbr_mart_tbls.sywr_srs_soar_bu\` AS c 
+    ON   b.ProdIrlNbr=c.prd_irl_no 
+    LEFT JOIN   \`syw-analytics-repo-prod.lci_dw_views.sprs_product\` z 
+    ON   b.ProdIrlNbr = z.prd_irl_no 
+    LEFT JOIN ( SELECT     prodirlnbr
+                            ,on_hand_inv_units   
+                        FROM ( SELECT   prodirlnbr
+                                        ,locn_nbr
+                                        ,wk_nbr
+                                        ,on_hand_inv_units
+                                        ,RANK() OVER (PARTITION BY prodirlnbr, locn_nbr ORDER BY wk_nbr DESC) AS rn     
+                                    FROM    inv     
+                                    WHERE   locn_nbr = @str )   
+                        WHERE     rn = 1 ) AS d 
+     ON   b.ProdIrlNbr = d.prodirlnbr 
+     WHERE   b.TranDt >'2017-04-30'   
+                AND b.TranDt <'2017-12-31'   
+                AND b.FmtSbtyp IN ('A','B','C','D','M')   
+                AND b.mrchndssoldstscd IN ('R','P')   
+                AND b.SrsKmtInd='S'   
+                AND b.trantypeind = 'S'   
+                AND b.SrsDvsnNbr NOT IN (0,79)   
+                AND b.locnnbr <> 9300   
+                AND b.ringinglocnnbr <> 9300   
+                AND c.soar_no IN (101,102,103,104,105)   
+                AND b.locnnbr = @str   
+                AND z.ssn_cd IN ('H7','F7')   
+                AND c.soar_no IN (101, 102, 103, 104, 105)   
+                AND c.NAT_SLL_PRC > 0 
+      GROUP BY   1,2,3,4,5,6,7,8,9,10,11,12,13,14 
+      HAVING   UNITS > 0"
 
 echo Writing to Google Storage store $store ... 
 bq extract apparel_ao_v2_allstores.store_data_store_$store'_'$season gs://ao-v2-bucket/store-data-fw/store_data_store_$store'_'$soar'_'$div'_'$season.csv
