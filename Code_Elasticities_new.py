@@ -87,7 +87,7 @@ for name, group in analysisFile.groupby('div_ln_cls', as_index=False):
     coef = [0]*23000
     startwk = [0]*23000
     endwk = [0]*23000
-
+###Find the begin and end weeks for the min ceof you can find for one cluster.
     for i in np.arange(0, sortData.shape[0]-2, 1):
 #        print(weeklist[i])
 
