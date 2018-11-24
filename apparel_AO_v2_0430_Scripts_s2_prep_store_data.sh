@@ -255,28 +255,26 @@ SELECT   a11.* EXCEPT(sim_mem_cnt,max_sim_mem_cnt)
         ,a12.div_units AS locnnbr_div_units
         ,a13.div_units AS storeA_div_units 
     FROM   cluster_sales_rank a11 
-    LEFT JOIN ( SELECT     x11.locnnbr
-                            ,x11.soar_no
-                            ,x11.div_no
-                            ,SUM(x11.UNITS) AS div_units   
-                    FROM     all_sales_L1Y x11   
-                    GROUP BY     x11.locnnbr,x11.soar_no,x11.div_no ) a12 
-                    ON   a11.locnnbr =a12.locnnbr   
-                         AND a11.soar_no = a12.soar_no   
-                         AND a11.div_no = a12.div_no 
-    LEFT JOIN ( SELECT     x11.locnnbr
-                           ,x11.soar_no
-                           ,x11.div_no
-                           ,SUM(x11.UNITS) AS div_units   
-                    FROM     all_sales_L1Y x11   
-                    GROUP BY     x11.locnnbr,x11.soar_no,x11.div_no ) a13 
-                    ON   a11.storeA =a13.locnnbr   
-                         AND a11.soar_no = a13.soar_no   
-                         AND a11.div_no = a13.div_no 
-                    WHERE   a11.UNITS = a11.cluster_max   
-                            AND a11.soar_no IN (101, 102,103, 104, 105)   
-                            AND a11.storeA = @str 
+         LEFT JOIN ( SELECT     x11.locnnbr
+                                ,x11.soar_no
+                                ,x11.div_no
+                                ,SUM(x11.UNITS) AS div_units   
+                         FROM   all_sales_L1Y x11   
+                         GROUP BY   1,2,3 ) a12 
+         ON   a11.locnnbr =a12.locnnbr   AND a11.soar_no = a12.soar_no   AND a11.div_no = a12.div_no 
+         LEFT JOIN ( SELECT     x11.locnnbr
+                                ,x11.soar_no
+                                ,x11.div_no
+                                ,SUM(x11.UNITS) AS div_units   
+                         FROM    all_sales_L1Y x11   
+                         GROUP BY   1,2,3 ) a13 
+          ON   a11.storeA =a13.locnnbr   AND a11.soar_no = a13.soar_no   AND a11.div_no = a13.div_no 
+    WHERE   a11.UNITS = a11.cluster_max   
+            AND a11.soar_no IN (101, 102,103, 104, 105)   
+            AND a11.storeA = @str 
+=====================UNION ALL=========================            
 UNION ALL 
+
 SELECT   @str AS storeA
         ,b.locnnbr
         ,c.soar_no
@@ -302,11 +300,11 @@ SELECT   @str AS storeA
         ,NULL AS locnnbr_div_units
         ,NULL AS storeA_div_units 
     FROM   \`syw-analytics-repo-prod.l2_enterpriseanalytics.postrandtl\` AS b 
-    LEFT JOIN   \`syw-analytics-repo-prod.cbr_mart_tbls.sywr_srs_soar_bu\` AS c 
-    ON   b.ProdIrlNbr=c.prd_irl_no 
-    LEFT JOIN   \`syw-analytics-repo-prod.lci_dw_views.sprs_product\` z 
-    ON   b.ProdIrlNbr = z.prd_irl_no 
-    LEFT JOIN ( SELECT     prodirlnbr
+            LEFT JOIN   \`syw-analytics-repo-prod.cbr_mart_tbls.sywr_srs_soar_bu\` AS c 
+            ON   b.ProdIrlNbr=c.prd_irl_no 
+            LEFT JOIN   \`syw-analytics-repo-prod.lci_dw_views.sprs_product\` z 
+            ON   b.ProdIrlNbr = z.prd_irl_no 
+            LEFT JOIN ( SELECT     prodirlnbr
                             ,on_hand_inv_units   
                         FROM ( SELECT   prodirlnbr
                                         ,locn_nbr
@@ -317,8 +315,7 @@ SELECT   @str AS storeA
                                     WHERE   locn_nbr = @str )   
                         WHERE     rn = 1 ) AS d 
      ON   b.ProdIrlNbr = d.prodirlnbr 
-     WHERE   b.TranDt >'2017-04-30'   
-                AND b.TranDt <'2017-12-31'   
+     WHERE   b.TranDt >'2017-04-30' AND b.TranDt <'2017-12-31'   
                 AND b.FmtSbtyp IN ('A','B','C','D','M')   
                 AND b.mrchndssoldstscd IN ('R','P')   
                 AND b.SrsKmtInd='S'   
