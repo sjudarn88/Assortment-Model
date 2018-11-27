@@ -28,6 +28,7 @@ bq query
 ,store_members AS (   
     SELECT     *   
           FROM     store_members_all_filtered )
+#per member of base store, ranking its similar member based on weighted-pair distances
 ,member_ranking AS (   
     SELECT     a.locnnbr AS storeA
               ,a.entityA
@@ -39,10 +40,11 @@ bq query
                 LEFT JOIN     store_members AS b   
                 ON     a.entityA = b.lyltycardnbr   
            WHERE     b.lyltycardnbr IS NOT NULL )
-# per top 15k member, choose top 10 similar entities 
+# per top 15k member, choose top 10 similar members
 ,similar_top10_members AS (   
     SELECT     *   
           FROM     member_ranking   WHERE     rnk <= 10 )
+#per store, calculate number of similar members of other stores as 'num_sim_mem'    
 ,unique_similar_members AS (   
     SELECT     *
               ,COUNT(entityB) OVER(PARTITION BY storeA) AS num_sim_mem   
