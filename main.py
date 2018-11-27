@@ -7,7 +7,7 @@ div = str(sys.argv[2]) #'41_43'    # Seperate by _ if more than 1 division
 soar = str(sys.argv[3]) #str(104)   # Soar number of the division 
 desc= 'Basic_items_Apr_Mar_data'
 
-season = 'fw' # season code: fw-fall winter, ss-spring summer
+season = 'fw' # season code: fw-fall winter, ss-spring summer, basic-basic
 
 v='1'
 
