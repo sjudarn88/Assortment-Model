@@ -151,6 +151,7 @@ bq query
 ,sample AS (   
     SELECT     *   
         FROM     items_to_be_introduced )
+# per item,calculate different types of inventory by store by week for the last year.
 ,inv AS (   
     SELECT     CAST(FLOOR(SKU_ID/1000) AS int64) AS prodirlnbr
                ,LOCN_NBR AS locn_nbr
@@ -164,6 +165,7 @@ bq query
           WHERE     WK_END_DT BETWEEN DATE('2017-01-01') AND DATE('2017-12-31')     
                     AND TTL_UN_QT > 0   
           GROUP BY  1,2,3,4 )
+ #per item per store, calculate the total receipts of last year
 ,rcp AS (   
     SELECT     CAST(FLOOR(SKU_ID/1000) AS int64) AS prodirlnbr
                ,locn_nbr
@@ -177,6 +179,7 @@ bq query
                            WHERE       DAY_NBR BETWEEN '2017-01-01' AND '2017-12-31' )   
           GROUP BY     1,2   
           ORDER BY     2 )
+# per item per store,from items_to_be_introduced select max_on_hand_inv_units<6, and don't have receipt_units.
 ,store_items AS (   
     SELECT     s.storeA
                ,s.num_sim_mem
