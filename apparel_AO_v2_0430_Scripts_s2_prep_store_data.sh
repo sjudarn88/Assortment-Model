@@ -204,6 +204,7 @@ bq query
                 ON  s.prodirlnbr = f.prodirlnbr AND s.storeA = f.locn_nbr   
            WHERE  e.ttl_reciept_units IS NULL     
                   AND coalesce(f.max_on_hand_inv_units, 0) < 6 
+# calculate total sales units per item for mrchndssoldstscd IN ('R','P') 
 ,all_sales_L1Y AS (   
     SELECT     b.locnnbr
                ,c.soar_no
