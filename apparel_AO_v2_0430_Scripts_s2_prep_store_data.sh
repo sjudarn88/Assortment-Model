@@ -58,6 +58,8 @@ bq query
                           ON       a.storeB = b.locn_nbr     
                      WHERE       a.storeB IS NOT NULL     
                      GROUP BY       1,       2,       3,       4 ) )
+# per store for each similar member, look at their transaction record to find what product they purchased, exclude those purchased at other stores.
+# limit items in perticular sears apparel,transactiontype,soar no, ssn_cd
 ,items_purchased_by_similar_members AS (   
     SELECT     a.storeA
                ,a.num_sim_mem
@@ -91,6 +93,7 @@ bq query
                       AND z.ssn_cd IN ('H7','F7')   
                       GROUP BY  1,2,3,4,5,6,7,8,9,10,11   
                       HAVING     UNITS > 0 )
+# base store purchased items at the same period, and sum the quantity
 ,items_purchased_by_store_members AS (   
     SELECT     b.locnnbr
               ,c.soar_no
@@ -108,8 +111,7 @@ bq query
                 ON     b.ProdIrlNbr=c.prd_irl_no   
                 LEFT JOIN     \`syw-analytics-repo-prod.lci_dw_views.sprs_product\` z   
                 ON     b.ProdIrlNbr = z.prd_irl_no  
-          WHERE     b.TranDt >'2017-04-30'     
-                    AND b.TranDt <'2017-12-31'     
+          WHERE     b.TranDt >'2017-04-30' AND b.TranDt <'2017-12-31'     
                     AND b.FmtSbtyp IN ('A','B','C','D','M')     
                     AND b.lyltycardnbr IS NOT NULL     
                     AND b.SrsKmtInd='S'     
@@ -125,6 +127,7 @@ bq query
                     AND z.ssn_cd IN ('H7','F7')   
            GROUP BY  1,2,3,4,5,6,7,8,9,10   
            HAVING     UNITS > 0 )
+# filter out the product which is not sold at base store.
 ,items_to_be_introduced AS (   
     SELECT     a.storeA
               ,a.num_sim_mem
