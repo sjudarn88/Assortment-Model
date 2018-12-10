@@ -22,7 +22,8 @@ bq query --allow_large_results
                        , log(SUM(b.UnitQty)) as UNITS 
                    from \`syw-analytics-repo-prod.l2_enterpriseanalytics.postrandtl\` as b 
                         LEFT JOIN \`syw-analytics-repo-prod.cbr_mart_tbls.sywr_srs_soar_bu\` as c 
-                                ON b.ProdIrlNbr=c.prd_irl_no left join \`syw-analytics-repo-prod.lci_dw_views.sprs_product\` z 
+                                ON b.ProdIrlNbr=c.prd_irl_no 
+                        left join \`syw-analytics-repo-prod.lci_dw_views.sprs_product\` z 
                                 on b.ProdIrlNbr = z.prd_irl_no 
                    WHERE b.TranDt >'2017-04-01' and b.TranDt <'2018-03-31' 
                                 AND b.FmtSbtyp IN ('A','B','C','D','M') AND b.SrsKmtInd='S' 
