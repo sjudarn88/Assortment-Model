@@ -70,7 +70,8 @@ bq query --allow_large_results
                         , lead(price_start_wk, 1, 999999) over(partition by soar_no, div_no, ln_no, cls_no order by price_start_wk) as next_price_start_wk 
                    from cls_lvl_price ) 
                    
-                   
+        ###join sales units with price
+        ###level division/line/class/week
          select   b.soar_no
                  , b.div_no
                  , b.ln_no
