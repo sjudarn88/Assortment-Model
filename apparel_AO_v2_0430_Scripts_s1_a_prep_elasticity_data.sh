@@ -63,6 +63,8 @@ bq query --allow_large_results
                     where locn_nbr in (select storeB from \`apparel_jaccard_pp.sim_stores_10_fw\` where storeA = @str) 
                           and price_amt > 0 
                     group by 1,2,3,4,5 ) 
+                    
+        ###add next week # for each class
          , cls_lvl_price2 as ( 
                select *
                         , lead(price_start_wk, 1, 999999) over(partition by soar_no, div_no, ln_no, cls_no order by price_start_wk) as next_price_start_wk 
