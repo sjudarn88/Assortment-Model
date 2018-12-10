@@ -19,7 +19,8 @@ print("Reading file")
 analysisFile = pd.DataFrame()
 analysisFile = pd.read_csv(elasticfile, index_col=None, header=0)
 
-#columns with cluster numbers
+#columns with class numbers
+#not all log price across each pair of classes will have value, so lots of NAs.
 cols = [col for col in analysisFile.columns if col not in ['Unnamed: 0', 'wk_nbr', 'div_ln_cls', 'log_UNITS']]
 
 #for store __,delete 14 cols out of 36 cols.
