@@ -8,10 +8,11 @@ div = sys.argv[2]
 soar = sys.argv[3]
 season = sys.argv[4]
 
+###output file
 result = pd.DataFrame()
 resultfile2 = './' + store + '_' + soar + "_" + div + "_" + season + '/elasticities_' + store + '_' +soar + "_" + div +"_"+ season + '_pair.csv'
 result2 = pd.DataFrame()
-
+###input file
 elasticfile = './' + store + '_' +  soar + "_" + div + "_" + season + '/_' + store + '_' + soar + '_' + div + '_wide.csv'
 
 print("Reading file")
