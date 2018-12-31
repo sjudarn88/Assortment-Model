@@ -123,7 +123,7 @@ dt = pd.concat([dt_existing, dt_new_greaterthanmedian], axis = 0)
 print(dt.shape)
 dt_original = pd.concat([dt_new_lessthanmedian, dt_existing, dt_new_greaterthanmedian])
 
-
+### dt_original has 3 types now: new,existing, new_lessthanmedian
 dt_original = dt_original.rename(columns = {"prodirlnbr" : "prodirlno"})
 print(dt_original.shape)
 
