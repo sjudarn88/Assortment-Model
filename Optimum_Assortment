@@ -110,21 +110,21 @@ dt["cluster_max"] = dt.apply(lambda x: ((x["storeA_div_units"]/x["locnnbr_div_un
 
 dt_existing = dt[dt.type == "existing"].copy()
 median = dt_existing.describe()["UNITS"]["50%"]
-print(median)
+#print(median)
 dt_new = dt[dt.type == "new"].copy()
-print(dt_new.shape)
+#print(dt_new.shape)
 dt_new_lessthanmedian = dt_new[dt_new.cluster_max <= median]
 dt_new_lessthanmedian["type"] = "new-lessthanmedian"
 print(dt_new_lessthanmedian.shape)
 dt_new_greaterthanmedian = dt_new[dt_new.cluster_max > median]
-print(dt_new_greaterthanmedian.shape)
+#print(dt_new_greaterthanmedian.shape)
 dt = pd.concat([dt_existing, dt_new_greaterthanmedian], axis = 0)
-print(dt.shape)
+#print(dt.shape)
 dt_original = pd.concat([dt_new_lessthanmedian, dt_existing, dt_new_greaterthanmedian])
 
 ### dt_original has 3 types now: new,existing, new_lessthanmedian
 dt_original = dt_original.rename(columns = {"prodirlnbr" : "prodirlno"})
-print(dt_original.shape)
+#print(dt_original.shape)
 
 
 ###use average value to impute price ATL_SELL_PPRICE*AVG(otd_pc)
