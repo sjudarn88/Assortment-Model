@@ -101,7 +101,6 @@ dt = dt.drop_duplicates('prodirlnbr')
 
 dt_original = dt.copy()
 print(dt_original.shape)
-#dt_original = dt.copy()
 dt["cluster_max_old"] = dt["cluster_max"]
 dt["cluster_max"] = dt.apply(lambda x: ((x["storeA_div_units"]/x["locnnbr_div_units"]) * x["cluster_max"] +(x["sim_mem_cnt"]/x["max_sim_mem_cnt"])*x["cluster_max"])/2 if x["type"] == "new" else None, axis = 1)
 
