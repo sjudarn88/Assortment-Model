@@ -160,7 +160,7 @@ elasticity = pd.read_csv('./' + store + '_' + soar + "_"+div + "_" + season +  '
 # Replace missing elasticities with 0
 #elasticity['elasticity'] = elasticity.elasticity.transform(lambda x: x.fillna(0))
 
-# Thresold elasticity values
+# Thresold elasticity values, use threshold function above.
 elasticity['elasticity'] = elasticity.apply(thresold, axis = 1)
 
 
