@@ -128,13 +128,13 @@ dt_original = dt_original.rename(columns = {"prodirlnbr" : "prodirlno"})
 print(dt_original.shape)
 
 
-
-#NATL_SELL_PPRICE*AVG(otd_pc)
+###use average value to impute price ATL_SELL_PPRICE*AVG(otd_pc)
 avg_otd = np.mean(dt["otd_pc"])
 dt['avg_otd'] = avg_otd
 #print(avg_otd)
 dt['price'] = np.where(dt['otd_amt'].isnull(), dt['NAT_SLL_PRC'] * dt['avg_otd'], dt['otd_amt'])
 #dt.NAT_SLL_PRC.isna().sum()
+
 
 avg_otd = np.mean(dt_original["otd_pc"])
 dt_original['avg_otd'] = avg_otd
