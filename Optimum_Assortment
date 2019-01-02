@@ -185,6 +185,7 @@ ss = dt.loc[:,("prodirlno", "potentail_profit", "div_ln_cls")]
 
 ss = ss[ss["potentail_profit"] > 0]
 
+###this line remove lots of record from dt.
 ss = ss[ss.div_ln_cls.isin(elasticity['div_ln_cls_1'].tolist()+elasticity['div_ln_cls_2'].tolist())]
 categorical_names = {}
 le = sklearn.preprocessing.LabelEncoder()
