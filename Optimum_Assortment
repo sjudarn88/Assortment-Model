@@ -216,11 +216,9 @@ elas_map = SortedDict(elas_map)
 
 #Classes in Optimum Set
 classes = ss_optimum.div_ln_cls_num.tolist()
-
 classes_v1 = ss_optimum.potentail_profit.tolist()
+classes_v= ss_optimum.potentail_profit.tolist()
 
-classes_v= ss_optimum.potentail_profit.tolist()
-classes_v= ss_optimum.potentail_profit.tolist()
 
 
 if __name__ == '__main__':
