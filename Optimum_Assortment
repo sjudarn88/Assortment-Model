@@ -225,6 +225,7 @@ if __name__ == '__main__':
     pool = Pool(8)
     t1 = time.time()
     while (len(optimum) < dt[dt.type ==  "existing"].shape[0]):
+        #remove the max profit product and choose the next from the rest of the data.
         ss_ss = ss[~ss.prodirlno.isin(optimum_skus)]
         if ss_ss.shape[0] == 0:
             break
