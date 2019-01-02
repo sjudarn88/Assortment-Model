@@ -201,6 +201,7 @@ categorical_names['div_ln_cls_2'] = le.classes_
 ss['div_ln_cls_num'] = le.transform(ss['div_ln_cls'])
 #categorical_names['div_ln_cls_num'] = le.classes_
 optimum = []
+### add max profit index to the list.
 optimum.append((1, ss.loc[ss["potentail_profit"].idxmax(),:][0]))
 optimum_skus =  [r[1] for r in optimum]
 ss_optimum = ss[ss.prodirlno.isin(optimum_skus)]
