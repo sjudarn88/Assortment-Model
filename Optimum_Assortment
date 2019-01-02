@@ -209,6 +209,7 @@ ss_optimum = ss[ss.prodirlno.isin(optimum_skus)]
 elas = elasticity.iloc[:,[0,1,2]]
 elas['c_map'] = elas['div_ln_cls_1'].astype(str) + '_' + elas['div_ln_cls_2'].astype(str)
 
+### map pairs of class
 elas = elas.iloc[:,[3,2]]
 elas_map = elas.set_index('c_map')['elasticity'].to_dict()
 elas_map = SortedDict(elas_map)
