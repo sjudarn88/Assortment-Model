@@ -42,5 +42,5 @@ for store in stores:
     with open("progress.txt", "a") as myfile:
         myfile.write("STORE :" +str(store) + "\n")
     for div in divs:
-        os.system("/home/peddakota_vikash/anaconda3/bin/python main.py " + str(store) + " " + str(div) + " " + str(soar))
+        os.system("/home/dan_shao/anaconda3/bin/python main.py " + str(store) + " " + str(div) + " " + str(soar))
     #break 
