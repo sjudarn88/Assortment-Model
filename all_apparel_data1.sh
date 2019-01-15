@@ -1,19 +1,26 @@
 with sears_div as (
-select SOAR_NO, SOAR_NM, DIV_NO, DIV_NM from `syw-analytics-repo-prod.crm_perm_tbls.sywr_srs_soar_bu`
-where SOAR_NM like '%APPAREL%' or SOAR_NM like '%TOOL%' or SOAR_NM like '%HOME%'
-group by 1,2,3,4
+	select SOAR_NO, SOAR_NM, DIV_NO, DIV_NM 
+		from `syw-analytics-repo-prod.crm_perm_tbls.sywr_srs_soar_bu`
+		where SOAR_NM like '%APPAREL%' or SOAR_NM like '%TOOL%' or SOAR_NM like '%HOME%'
+		group by 1,2,3,4
 )
-------------------------
 , sears_div2 as (
-select  srsgrp_kmtbsnss_desc, srsgrp_kmtbsnss_nbr ,srsctgry_kmtunit_nbr, srsctgry_kmtunit_desc, srsvrtclbsnss_kmtdvsn_desc, srsvrtclbsnss_kmtdvsn_nbr, srsdvsn_kmtdept_desc, srsdvsn_kmtdept_nbr  
-from `syw-analytics-repo-prod.l2_enterpriseanalytics.merchlvl90skuandksn`
-where srsdvsn_kmtdept_nbr in (select DIV_NO from sears_div)
-and srsgrp_kmtbsnss_nbr <> 1 -- exclude KMART (Miscellaneous
-and srsgrp_kmtbsnss_nbr = 803 -- sears apparel
-group by 1,2,3,4,5,6,7,8
-order by 1,2,3,4,5,6,7,8
+	select  srsgrp_kmtbsnss_desc
+		, srsgrp_kmtbsnss_nbr 
+		, srsctgry_kmtunit_nbr
+		, srsctgry_kmtunit_desc
+		, srsvrtclbsnss_kmtdvsn_desc
+		, srsvrtclbsnss_kmtdvsn_nbr
+		, srsdvsn_kmtdept_desc
+		, srsdvsn_kmtdept_nbr  
+		from `syw-analytics-repo-prod.l2_enterpriseanalytics.merchlvl90skuandksn`
+		where srsdvsn_kmtdept_nbr in (select DIV_NO from sears_div)
+			and srsgrp_kmtbsnss_nbr <> 1 -- exclude KMART (Miscellaneous
+			and srsgrp_kmtbsnss_nbr = 803 -- sears apparel
+		group by 1,2,3,4,5,6,7,8
+		order by 1,2,3,4,5,6,7,8
 )
-------------------------
+
 , receipts as (
 select hier.gro_nbr, hier.vbs_nbr, hier.div_nbr, hier.ln_nbr, hier.sbl_nbr, hier.cls_nbr, rcp.sku_id, rcp.locn_nbr,
 	 (cal.acctg_yr*100 + cal.acctg_wk) as wk_nbr, -- rcp.wk_end_dt,
